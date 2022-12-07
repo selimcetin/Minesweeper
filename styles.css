@@ -1,0 +1,199 @@
+:root{
+    --title-bg-color: #5d71e7;
+    --playfield-color: rgb(58, 58, 58);
+    --button-text-color: black;
+    --button-bg-color: #bbbfda;
+    --footer-color: gray;
+    --cells-color: rgb(161, 161, 161);
+    --cells-border-color: rgba(87, 87, 87, 0);
+    --shadowsize: 3px;
+    --shadowcolor: rgb(121, 120, 120);
+    --highlightcolor: rgb(197, 197, 197);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+}
+    html, body {
+    height: 100%;
+}
+
+.content {
+    width: min(100vw, 50vh);
+    height: min(100vh, 200vw);
+    background-color: orange;
+    margin: 0 auto;
+}
+
+.title {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: var(--title-bg-color);
+    width: 100%;
+    height: 10%;
+    background-image: url(images/minesweeper.png);
+    background-size: 100%;
+    background-position: 0% 12%;
+}
+
+.title_text {
+    padding-top: 10px;
+    padding-left: 10px;
+}
+
+.playfield {
+    justify-content: space-evenly;
+    align-content: space-evenly;
+    display: flex;
+    flex-wrap: wrap;
+    background-color: var(--playfield-color);
+    width: 100%;
+    height: 50%;
+    position: relative;
+}
+
+.cells {
+    border: solid var(--shadowsize) var(--cells-border-color);
+    background-color: var(--cells-color);
+    width: calc((100%/9 - 8px));
+    height: calc((100%/9 - 8px));
+    flex-shrink: 0;
+}
+
+.covered {
+    border-style: solid;
+    border-top-color: var(--highlightcolor);
+    border-left-color: var(--highlightcolor);
+    border-bottom-color: var(--shadowcolor);
+    border-right-color: var(--shadowcolor);
+}
+
+.mark_1 {
+    background-image: url(images/symbols.svg);
+    background-size: 1000%;
+    background-position-x: 1%;
+}
+
+.mark_2 {
+    background-image: url(images/symbols.svg);
+    background-size: 1000%;
+    background-position-x: 11%;
+}
+
+
+.mark_3 {
+    background-image: url(images/symbols.svg);
+    background-size: 1000%;
+    background-position-x: 22%;
+}
+
+
+.mark_4 {
+    background-image: url(images/symbols.svg);
+    background-size: 1000%;
+    background-position-x: 33%;
+}
+
+
+.mark_5 {
+    background-image: url(images/symbols.svg);
+    background-size: 1000%;
+    background-position-x: 44%;
+}
+
+
+.mark_6 {
+    background-image: url(images/symbols.svg);
+    background-size: 1000%;
+    background-position-x: 55%;
+}
+
+
+.mark_7 {
+    background-image: url(images/symbols.svg);
+    background-size: 1000%;
+    background-position-x: 67%;
+}
+
+.mark_8 {
+    background-image: url(images/symbols.svg);
+    background-size: 1000%;
+    background-position-x: 78%;
+}
+
+.mark_flag {
+    background-image: url(images/symbols.svg);
+    background-size: 1000%;
+    background-position-x: 89%;
+}
+
+.mark_mine {
+    background-image: url(images/symbols.svg);
+    background-size: 1000%;
+    background-position-x: 100%;
+}
+
+.buttons {
+    background-color: var(--button-bg-color);
+    width: 100%;
+    height: 30%;
+    display:flex;
+    align-items: center;
+    justify-content: space-around;
+}
+
+button {
+    width: 30%;
+    height: 30%;
+    font-size: 20px;
+    border: 2px solid black;
+    border-radius: 8%;
+}
+
+.footer {
+    background-color: var(--footer-color);
+    width: 100%;
+    height: 10%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+footer {
+    padding: 10px;
+}
+
+
+#overlay {
+    position: absolute; /* Sit on top of the page content */
+    display: flex; /* Hidden by default */
+    width: 100%; /* Full width (cover the whole page) */
+    height: 100%; /* Full height (cover the whole page) */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.5); /* Black background with opacity */
+    z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
+    cursor: pointer; /* Add a pointer on hover */
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+
+}
+
+#overlay_text {
+    padding: 10px;
+    font-family: 'Quicksand', sans-serif;
+    color: rgba(0, 0, 0, 0.6);
+    font-size: 2em;
+    border: black;
+    background-color: white;
+    border-style: solid;
+    border-width: 2px;
+    border-radius: 10px
+}
+
+#overlay:hover {
+    opacity: 1;
+}
