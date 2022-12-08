@@ -70,67 +70,77 @@
 
 .mark_1 {
     background-image: url(images/symbols.svg);
-    background-size: 1000%;
+    background-size: 1200%;
     background-position-x: 1%;
+    background-position-y: 30%;
 }
 
 .mark_2 {
     background-image: url(images/symbols.svg);
-    background-size: 1000%;
-    background-position-x: 11%;
+    background-size: 1200%;
+    background-position-x: 13%;
+    background-position-y: 30%;
 }
 
 
 .mark_3 {
     background-image: url(images/symbols.svg);
-    background-size: 1000%;
-    background-position-x: 22%;
+    background-size: 1200%;
+    background-position-x: 25%;
+    background-position-y: 30%;
 }
 
 
 .mark_4 {
     background-image: url(images/symbols.svg);
-    background-size: 1000%;
-    background-position-x: 33%;
+    background-size: 1200%;
+    background-position-x: 37%;
+    background-position-y: 30%;
 }
 
 
 .mark_5 {
     background-image: url(images/symbols.svg);
-    background-size: 1000%;
+    background-size: 1200%;
     background-position-x: 44%;
+    background-position-y: 30%;
 }
 
 
 .mark_6 {
     background-image: url(images/symbols.svg);
-    background-size: 1000%;
+    background-size: 1200%;
     background-position-x: 55%;
+    background-position-y: 30%;
 }
 
 
 .mark_7 {
     background-image: url(images/symbols.svg);
-    background-size: 1000%;
+    background-size: 1200%;
     background-position-x: 67%;
+    background-position-y: 30%;
 }
 
 .mark_8 {
     background-image: url(images/symbols.svg);
-    background-size: 1000%;
+    background-size: 1200%;
     background-position-x: 78%;
+    background-position-y: 30%;
 }
 
 .mark_flag {
     background-image: url(images/symbols.svg);
-    background-size: 1000%;
+    background-size: 1200%;
     background-position-x: 89%;
+    background-position-y: 30%;
 }
 
 .mark_mine {
     background-image: url(images/symbols.svg);
-    background-size: 1000%;
+    background-size: 1200%;
     background-position-x: 100%;
+    background-position-y: 30%;
 }
 
 .buttons {

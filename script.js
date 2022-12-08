@@ -156,7 +156,7 @@ const gameController =
     createPlayfield: function(gameType, divPlayfield)
     {
         this.numCells = (9+gameType*8)**2;
-        this.numMines = 9+gameType*8;
+        this.numMines = 18+gameType*45;
         this.gameType = gameType;
         this.firstSweep = 1;
 
@@ -239,8 +239,6 @@ const gameController =
 
     placeMinesOnField: function(boolArr, el)
     {
-        let firstFieldX = el.dataset.x;
-        let firstFieldY = el.dataset.y;
         let mineCount = 0;
         let row = Math.sqrt(this.numCells);
         let neighbourList = this.getNeighbourList(el);
@@ -263,7 +261,7 @@ const gameController =
                 console.log("x: " + randomX + " y: " + randomY);
             }
 
-            if(mineCount >= row) break;
+            if(mineCount >= this.numMines) break;
         }
 
         //console.log(mineCount);
