@@ -120,22 +120,6 @@ const Minesweeper =
     {
         return document.createTextNode(text);
     },
-
-    test: function()
-    {
-        let arr = [1,2];
-
-        for(let i of arr)
-        {
-            let random = Math.floor(Math.random()*2)
-            if(random)
-                arr.push(i+1);
-            
-            console.log("i: " + i);
-            console.log("random: " + random);
-            console.log(arr);
-        }
-    }
 }
 
 const gameController =
@@ -258,13 +242,10 @@ const gameController =
             {
                 mineCount++;
                 boolArr[randomX][randomY] = true;
-                console.log("x: " + randomX + " y: " + randomY);
             }
 
             if(mineCount >= this.numMines) break;
         }
-
-        //console.log(mineCount);
     },
 
     cellHasMine: function(boolArr, el)
@@ -292,6 +273,7 @@ const gameController =
 
             if(0 == mineCount)
             {
+                this.markCell(el, mineCount);
                 todoArr = new Array();
                 doneArr = new Array();
                 this.checkAllEmptyNeighbours(boolArr, el, todoArr, doneArr);
@@ -318,8 +300,14 @@ const gameController =
 
     markFlag: function(el)
     {
+        // Toggle mark flag
+        //-----------------
         if(el.classList.contains("mark_flag"))
             el.classList.remove("mark_flag");
+        // Do nothing on uncovered cells
+        //------------------------------
+        else if(!el.classList.contains("covered"))
+            return;
         else
             el.classList.add("mark_flag");
     },
@@ -355,9 +343,6 @@ const gameController =
     {
         let uncovCount = this.getCellUncoveredCount();
         let targetCount = this.numCells - this.numMines;
-
-        console.log(uncovCount);
-        console.log(targetCount);
 
         return ((uncovCount == targetCount) ? true : false);
     },
