@@ -19,7 +19,7 @@ const Minesweeper =
         this.defineBody();
         this.defineHeader(this.divContent[0]);
         this.definePlayfield(this.divContent[0]);
-        this.defineButtons(this.divContent[0]);
+        this.defineButtons(this.divContent[0], this.divPlayfield[0]);
         this.defineFooter(this.divContent[0]);
         gameController.createPlayfield(0, this.divPlayfield[0]);
     },
@@ -57,16 +57,13 @@ const Minesweeper =
     definePlayfield: function(divContent)
     {
         let divPlayfield = NodeFactory.createDivPlayfield();
-        let divOverlay = NodeFactory.createDivOverlay();
 
         gameController.createPlayfield(0, divPlayfield);
 
         divContent.appendChild(divPlayfield);
-        
-        
     },
 
-    defineButtons: function(divContent)
+    defineButtons: function(divContent, divPlayfield)
     {
         // Create the buttons and container
         //---------------------------------
@@ -92,13 +89,11 @@ const Minesweeper =
             divButtons.appendChild(btnMedium);
             divButtons.appendChild(btnLarge);
 
-        let divPlayfield = divContent.getElementsByClassName("playfield");
-
         // Add click-Events for the buttons
         //---------------------------------
-        btnSmall.addEventListener("click", (event) => gameController.createPlayfield(0, divPlayfield[0]));
-        btnMedium.addEventListener("click", (event) => gameController.createPlayfield(1, divPlayfield[0]));
-        btnLarge.addEventListener("click", (event) => gameController.createPlayfield(2, divPlayfield[0]));
+        btnSmall.addEventListener("click", (event) => gameController.createPlayfield(0, divPlayfield));
+        btnMedium.addEventListener("click", (event) => gameController.createPlayfield(1, divPlayfield));
+        btnLarge.addEventListener("click", (event) => gameController.createPlayfield(2, divPlayfield));
     },
 
     defineFooter: function(divContent)
@@ -140,7 +135,7 @@ const gameController =
     createPlayfield: function(gameType, divPlayfield)
     {
         this.numCells = (9+gameType*8)**2;
-        this.numMines = 18+gameType*45;
+        this.numMines = 15+gameType*50;
         this.gameType = gameType;
         this.firstSweep = 1;
 
@@ -264,7 +259,7 @@ const gameController =
         if(this.cellHasMine(boolArr, el))
         {
             this.markMine(el);
-            this.gameLost(boolArr);
+            this.gameEnd(boolArr, "You lose");
         }
         else
         {
@@ -285,7 +280,7 @@ const gameController =
         }
 
         if(this.isGameWon())
-            this.gameWon();
+            this.gameEnd(boolArr, "You won");
     },
 
     markCell: function(el, mineCount)
@@ -445,25 +440,15 @@ const gameController =
         }
     },
 
-    gameWon: function()
+    gameEnd: function(boolArr, text)
     {
         let divPlayfield = document.getElementsByClassName("playfield")[0];
-        let divOverlay = NodeFactory.createDivOverlay("You won");
+        let divOverlay = NodeFactory.createDivOverlay(text);
         divPlayfield.appendChild(divOverlay);
 
         this.firstSweep = 1;
         this.revealAllMines(boolArr);
     },
-
-    gameLost: function(boolArr)
-    {
-        let divPlayfield = document.getElementsByClassName("playfield")[0];
-        let divOverlay = NodeFactory.createDivOverlay("You lose");
-        divPlayfield.appendChild(divOverlay);
-
-        this.firstSweep = 1;
-        this.revealAllMines(boolArr);
-    }
 }
 
 const NodeFactory =

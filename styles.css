@@ -138,9 +138,9 @@
 
 .mark_mine {
     background-image: url(images/symbols.svg);
-    background-size: 1200%;
-    background-position-x: 100%;
-    background-position-y: 30%;
+    background-size: 1100%;
+    background-position-x: 99%;
+    background-position-y: 50%;
 }
 
 .buttons {
