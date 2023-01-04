@@ -12,7 +12,7 @@ const Minesweeper =
 
     // Functions
     //----------
-    init: function()
+    init: async function()
     {
         this.divContent = document.body.getElementsByClassName("content");
         this.divPlayfield = document.body.getElementsByClassName("playfield");
@@ -21,7 +21,7 @@ const Minesweeper =
         this.definePlayfield(this.divContent[0]);
         this.defineButtons(this.divContent[0], this.divPlayfield[0]);
         this.defineFooter(this.divContent[0]);
-        gameController.createPlayfield(0, this.divPlayfield[0]);
+        await remoteGameController.init(0, this.divPlayfield[0]);
     },
 
     defineBody: function()
@@ -58,7 +58,7 @@ const Minesweeper =
     {
         let divPlayfield = NodeFactory.createDivPlayfield();
 
-        gameController.createPlayfield(0, divPlayfield);
+        remoteGameController.init(0, divPlayfield);
 
         divContent.appendChild(divPlayfield);
     },
@@ -91,9 +91,9 @@ const Minesweeper =
 
         // Add click-Events for the buttons
         //---------------------------------
-        btnSmall.addEventListener("click", (event) => gameController.createPlayfield(0, divPlayfield));
-        btnMedium.addEventListener("click", (event) => gameController.createPlayfield(1, divPlayfield));
-        btnLarge.addEventListener("click", (event) => gameController.createPlayfield(2, divPlayfield));
+        btnSmall.addEventListener("click", (event) => remoteGameController.init(0, divPlayfield));
+        btnMedium.addEventListener("click", (event) => remoteGameController.init(1, divPlayfield));
+        btnLarge.addEventListener("click", (event) => remoteGameController.init(2, divPlayfield));
     },
 
     defineFooter: function(divContent)
@@ -117,27 +117,34 @@ const Minesweeper =
     },
 }
 
-const gameController =
+const remoteGameController =
 {
-    // Variables
-    //----------
-    gameEndCounter: 0,
-    gameType: 0,
-    numCells: 81,
-    numMines: 9,
-    arrPlayfield: new Array(),
-    touchstartTime: new Date(),
-    touchendTime: new Date(),
-    firstSweep: 1,
-
     // Functions
     //----------
-    createPlayfield: function(gameType, divPlayfield)
+    token: 0,
+    userID: 0,
+    numCells: 0,
+    numMines: 0,
+    firstSweep: 0,
+    size: 0,
+
+    init: async function(size, divPlayfield)
     {
-        this.numCells = (9+gameType*8)**2;
-        this.numMines = 15+gameType*50;
-        this.gameType = gameType;
+        this.url = "https://www2.hs-esslingen.de/~melcher/internet-technologien/minesweeper/";
+        this.userID = "seceit01";
+        this.numCells = (9+size*8)**2;
+        this.numMines = 15+size*50;
         this.firstSweep = 1;
+        this.size = size;
+
+        let rowNum = Math.sqrt(this.numCells);
+
+        let request = `${this.url}?request=init&userid=${this.userID}&size=${rowNum}&mines=${this.numMines}`
+        let response = await this.fetchAndDecode(request);
+        console.log(response);
+        console.log(request);
+
+        this.token = response.token;
 
         // Empty the playfield
         //--------------------
@@ -147,7 +154,6 @@ const gameController =
         //----------------------------
         let divCell = NodeFactory.createDivCell();
         let y = -1;
-        let rowNum = Math.sqrt(this.numCells);
         for(let i = 0; i < this.numCells; i++)
         {
             // Put x and y values inside the element dataset
@@ -166,35 +172,40 @@ const gameController =
         NodeFactory.setEventListenersOnCells();
     },
 
-    createLogicArr: function()
+    fetchAndDecode: async function(request)
     {
-        let boolArr = new Array();
-        let maxArrIndex = Math.sqrt(this.numCells);
-
-        // Create boolean playfield, 2d-Array
-        //-----------------------------------
-        for(let x = 0; x < maxArrIndex; x++)
+        try
         {
-            boolArr.push(new Array(maxArrIndex));
-            for(let y = 0; y < maxArrIndex; y++)
-            {
-                boolArr[x][y] = false;
-            }
+            let res = await fetch(request);
+            return await res.json();
         }
-        this.arrPlayfield = boolArr;
+        catch (error)
+        {
+            console.log(error);
+        }
     },
+
+    sweep: async function(x, y)
+    {
+        let request = `${this.url}?request=sweep&token=${this.token}&x=${x}&y=${y}`;
+        let response = await this.fetchAndDecode(request);
+        let el = NodeFactory.getElementByDataset(x, y);
+
+        this.uncoverCell(response, el);
+
+        console.log(response);
+
+        for (let x of response.emptyCells)
+        {
+            console.log(x);
+        }
+    },
+
 
     leftClickCell: function(event, el)
     {
-        if(this.firstSweep)
-        {
-            this.firstSweep = 0;
-            this.createLogicArr();
-            this.placeMinesOnField(this.arrPlayfield, el);
-        }
-        
         if(!this.cellHasFlag(el))
-            this.uncoverCell(this.arrPlayfield, el)
+            this.sweep(el.dataset.x, el.dataset.y);
     },
 
     rightClickCell: function(event, el)
@@ -215,32 +226,10 @@ const gameController =
         if(deltaTime > 2000) this.leftClickCell(event, el);
         else this.rightClickCell(event, el);
     },
-
-    placeMinesOnField: function(boolArr, el)
+    cellHasFlag: function(el)
     {
-        let mineCount = 0;
-        let row = Math.sqrt(this.numCells);
-        let neighbourList = this.getNeighbourList(el);
-
-        // Stop loop only when all mines are placed
-        //-----------------------------------------
-        while(true)
-        {
-            let randomX = Math.floor(Math.random()*row);
-            let randomY = Math.floor(Math.random()*row);
-
-            let temp_el = NodeFactory.getElementByDataset(randomX, randomY);
-
-            // Only place mines outside of the clicked cell and its neighbours
-            //----------------------------------------------------------------
-            if(temp_el != el && !neighbourList.includes(temp_el) && !boolArr[randomX][randomY])
-            {
-                mineCount++;
-                boolArr[randomX][randomY] = true;
-            }
-
-            if(mineCount >= this.numMines) break;
-        }
+        let temp_el = NodeFactory.getElementByDataset(el.dataset.x, el.dataset.y);
+        return (temp_el.classList.contains("mark_flag") ? true : false);
     },
 
     cellHasMine: function(boolArr, el)
@@ -248,39 +237,30 @@ const gameController =
         if(boolArr[el.dataset.x][el.dataset.y]) return true;
     },
 
-    cellHasFlag: function(el)
+    uncoverCell: function(response, el)
     {
-        temp_el = NodeFactory.getElementByDataset(el.dataset.x, el.dataset.y);
-        return (temp_el.classList.contains("mark_flag") ? true : false);
-    },
-
-    uncoverCell: function(boolArr, el)
-    {
-        if(this.cellHasMine(boolArr, el))
+        if(response.minehit)
         {
             this.markMine(el);
-            this.gameEnd(boolArr, "You lose");
+            this.gameEnd(response.mines, "You lose");
         }
         else
         {
-            let neighbourList = this.getNeighbourList(el);
-            let mineCount = this.getCellMineCount(boolArr, neighbourList);
-
-            if(0 == mineCount)
-            {
-                this.markCell(el, mineCount);
-                todoArr = new Array();
-                doneArr = new Array();
-                this.checkAllEmptyNeighbours(boolArr, el, todoArr, doneArr);
-            }
-            else
-            {
-                this.markCell(el, mineCount);
-            }
+            let mineCount = response.minesAround;
+            (0 == mineCount) ? this.uncoverEmptyCells(response.emptyCells) : this.markCell(el, mineCount);
         }
 
-        if(this.isGameWon())
-            this.gameEnd(boolArr, "You won");
+        if(response.userwins)
+            this.gameEnd(response.mines, "You won");
+    },
+
+    uncoverEmptyCells: function(emptyCells)
+    {
+        for(let cell of emptyCells)
+        {
+            let el = NodeFactory.getElementByDataset(cell.x, cell.y);
+            this.markCell(el, cell.minesAround);
+        }
     },
 
     markCell: function(el, mineCount)
@@ -313,142 +293,24 @@ const gameController =
         el.classList.add("mark_mine");
     },
 
-    getCellMineCount: function(boolArr, neighbourList)
+    revealAllMines: function(mines)
     {
-        let mineCount = 0;
-
-        for(let el of neighbourList)
+        for(let mine of mines)
         {
-            let x = parseInt(el.dataset.x);
-            let y = parseInt(el.dataset.y);
-            if(boolArr[x][y])
-                mineCount++;
-        }
-        return mineCount;
-    },
-
-    getCellUncoveredCount: function()
-    {
-        coveredArr = document.getElementsByClassName("covered");
-
-        return (this.numCells - coveredArr.length);
-    },
-
-    isGameWon: function()
-    {
-        let uncovCount = this.getCellUncoveredCount();
-        let targetCount = this.numCells - this.numMines;
-
-        return ((uncovCount == targetCount) ? true : false);
-    },
-
-    getNeighbourList: function(el)
-    {
-        let el_x = parseInt(el.dataset.x);
-        let el_y = parseInt(el.dataset.y);
-        let maxArrIndex = Math.sqrt(this.numCells) - 1;
-        let neighbourList = new Array();
-        
-        for(let x = -1; x <= 1; x++)
-        {
-            for(let y = -1; y <= 1; y++)
-            {
-                let tempX = el_x + x;
-                let tempY = el_y + y;
-
-                // Skip the examined cell (X) or when index is out of border
-                //----------------------------------------------------------
-                if((!x && !y) || tempX < 0 || tempX > maxArrIndex || tempY < 0 || tempY > maxArrIndex)
-                    continue;
-
-                // Otherwise add element to list
-                //------------------------------
-                neighbourList.push(NodeFactory.getElementByDataset(el_x + x, el_y + y));
-            }
-        }
-        return neighbourList;
-    },
-
-    checkAllEmptyNeighbours: function(boolArr, el, todoArr, doneArr)
-    {
-        // Add all neighbours of clicked cell into todoArr
-        //------------------------------------------------
-        let neighbourList = this.getNeighbourList(el);
-        for(let temp_el of neighbourList)
-        {
-            todoArr.push(temp_el);
-        }
-
-        // Then work until todoArr is empty
-        // All elements inside todoArr must be examined
-        //---------------------------------------------
-        while(todoArr.length != 0)
-        {
-            for(let el of todoArr)
-            {
-                let neighbourList = this.getNeighbourList(el);
-                let mineCount = this.getCellMineCount(boolArr, neighbourList);
-
-                // Ignore if element is inside doneList
-                // and remove from todo-List
-                //--------------------------
-                if(doneArr.includes(el))
-                {
-                    this.removeFromArr(todoArr, el);
-                    continue;
-                }
-
-                if(0 == mineCount)
-                {
-                    for(let temp_el of neighbourList)
-                    {
-                        if(!doneArr.includes(temp_el))
-                            todoArr.push(temp_el);
-                    }
-                }
-
-                this.markCell(el, mineCount);
-
-                // Add examined cell to done and remove from todo
-                //-----------------------------------------------
-                doneArr.push(el);
-                this.removeFromArr(todoArr, el);
-                
-            }
+            let el = NodeFactory.getElementByDataset(mine.x, mine.y);
+            this.markMine(el);
         }
     },
 
-    removeFromArr: function(arr, el)
-    {
-        const i = arr.indexOf(el);
-        if (i > -1)                 // only splice array when item is found
-            arr.splice(i, 1);   // 2nd parameter means remove one item only
-    },
-
-    revealAllMines: function(boolArr)
-    {
-        for(let x = 0; x < boolArr.length; x++)
-        {
-            for(let y = 0; y < boolArr.length; y++)
-            {
-                if(boolArr[x][y])
-                {
-                    let el = NodeFactory.getElementByDataset(x,y);
-                    this.markMine(el);
-                }
-            }
-        }
-    },
-
-    gameEnd: function(boolArr, text)
+    gameEnd: function(mines, text)
     {
         let divPlayfield = document.getElementsByClassName("playfield")[0];
         let divOverlay = NodeFactory.createDivOverlay(text);
         divPlayfield.appendChild(divOverlay);
 
         this.firstSweep = 1;
-        this.revealAllMines(boolArr);
-    },
+        this.revealAllMines(mines);
+    }
 }
 
 const NodeFactory =
@@ -489,17 +351,17 @@ const NodeFactory =
         const cells = document.querySelectorAll(".cells");
         cells.forEach(el => {
             el.addEventListener("click", (e) => {
-                gameController.leftClickCell(e, el);
+                remoteGameController.leftClickCell(e, el);
             });
             el.addEventListener("contextmenu", (e) => {
                 e.preventDefault();
-                gameController.rightClickCell(e, el);
+                remoteGameController.rightClickCell(e, el);
             });
             el.addEventListener("touchstart", (e) => {
-                gameController.touchStartCell(e, el);
+                remoteGameController.touchStartCell(e, el);
             });
             el.addEventListener("touchend", (e) => {
-                gameController.touchEndCell(e, el);
+                remoteGameController.touchEndCell(e, el);
             });
         });
     },
@@ -517,8 +379,8 @@ const NodeFactory =
 
             // Apply style
             //------------
-            cell.style.width = styles[gameController.gameType];
-            cell.style.height = styles[gameController.gameType];
+            cell.style.width = styles[remoteGameController.size];
+            cell.style.height = styles[remoteGameController.size];
         }
     },
 
