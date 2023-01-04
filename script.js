@@ -192,15 +192,7 @@ const remoteGameController =
         let el = NodeFactory.getElementByDataset(x, y);
 
         this.uncoverCell(response, el);
-
-        console.log(response);
-
-        for (let x of response.emptyCells)
-        {
-            console.log(x);
-        }
     },
-
 
     leftClickCell: function(event, el)
     {
