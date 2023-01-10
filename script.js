@@ -141,8 +141,6 @@ const remoteGameController =
 
         let request = `${this.url}?request=init&userid=${this.userID}&size=${rowNum}&mines=${this.numMines}`
         let response = await this.fetchAndDecode(request);
-        console.log(response);
-        console.log(request);
 
         this.token = response.token;
 
